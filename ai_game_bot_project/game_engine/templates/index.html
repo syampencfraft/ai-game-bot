@@ -238,8 +238,7 @@
             <div style="text-align: right; margin-bottom: 25px;">
                 {% if user.is_authenticated %}
                 <div style="margin-bottom: 5px; font-size: 0.9rem; color: #b2bec3;">OPERATOR</div>
-                <div style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; margin-bottom: 10px;">{{
-                    user.username }}</div>
+                <div style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; margin-bottom: 10px;">{{ user.username }}</div>
                 <a href="{% url 'logout' %}"
                     style="color: var(--accent); text-decoration: none; font-size: 0.8rem; border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; transition: all 0.2s;">TERMINATE
                     SESSION</a>
@@ -252,8 +251,7 @@
             <h3
                 style="color: #ffeaa7; border-bottom: 1px solid #636e72; padding-bottom: 10px; margin-top: 0; font-family: 'Orbitron'; font-size: 1rem;">
                 PERSONAL BEST
-                <span style="color: white; display: block; font-size: 2rem; margin-top: 10px;">{{ user_high_score
-                    }}</span>
+                <span style="color: white; display: block; font-size: 2rem; margin-top: 10px;">{{ user_high_score }}</span>
             </h3>
 
             <h3
@@ -262,8 +260,7 @@
             <ul style="list-style: none; padding: 0; margin: 0;">
                 {% for s in top_scores %}
                 <li class="leaderboard-item">
-                    <span style="color: #b2bec3; font-family: 'Roboto Mono';">#{{ forloop.counter }} {{ s.user.username
-                        }}</span>
+                    <span style="color: #b2bec3; font-family: 'Roboto Mono';">#{{ forloop.counter }} {{ s.user.username }}</span>
                     <span style="color: #fab1a0; font-weight: bold; font-family: 'Orbitron';">{{ s.score }}</span>
                 </li>
                 {% empty %}
@@ -372,7 +369,7 @@
             }
         }
 
-        const IS_AUTHENTICATED = {{ user.is_authenticated| yesno: "true,false" }};
+        const IS_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
 
         async function saveScore(score) {
             if (IS_AUTHENTICATED) {

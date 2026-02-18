@@ -6,23 +6,26 @@ class AIAgent:
     def __init__(self, game):
         self.game = game
 
-    def get_move(self):
+    def get_move(self, state=None):
         """
         Determines the next move for the snake.
         Returns: Action (0, 1, 2, 3)
         """
-        start = self.game.head
-        goal = self.game.food
+        if state is None:
+            state = self.game.get_state()
+
+        start = tuple(state['snake'][0])
+        goal = tuple(state['food'])
         
         # Grid boundaries
-        rows, cols = self.game.height, self.game.width
+        rows, cols = state['grid_height'], state['grid_width']
         # Obstacles = snake body (excluding tail because it moves)
-        obstacles = set(self.game.body[:-1]) 
+        obstacles = set(tuple(p) for p in state['snake'][:-1]) 
         
         # A* Search
         path = self._a_star_search(start, goal, obstacles, rows, cols)
         
-        if path:
+        if path and len(path) > 1:
             # Determine direction from partial path (start -> next_node)
             next_node = path[1]
             return self._get_direction(start, next_node)
