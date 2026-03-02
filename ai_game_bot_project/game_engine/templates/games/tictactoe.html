@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Toe | AI strategy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00cec9;
+            --accent: #e17055;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 206, 201, 0.5);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 15px;
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .cell {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .cell:hover {
+            background: rgba(0, 206, 201, 0.1);
+            border-color: var(--primary);
+        }
+
+        .cell.x {
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
+        }
+
+        .cell.o {
+            color: var(--accent);
+            text-shadow: 0 0 15px var(--accent);
+        }
+
+        .dashboard {
+            width: 300px;
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-box {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #0984e3);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.5);
+        }
+
+        .back-link {
+            margin-top: 30px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .winner-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* Settings CSS */
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.3s;
+            z-index: 100;
+        }
+
+        .settings-btn:hover {
+            color: var(--primary);
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            z-index: 1010;
+            display: none;
+            width: 300px;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1005;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'index' %}" class="back-link">← BACK TO HUB</a>
+
+    <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="toggleSettings()"></div>
+    <div class="settings-modal" id="settings-modal">
+        <h3 style="font-family: 'Orbitron'; color: var(--primary); margin-top: 0;">MATCH SETTINGS</h3>
+
+        <label>STARTING PLAYER</label>
+        <select id="starter-select">
+            <option value="X">PLAYER (X)</option>
+            <option value="O">AI ENGINE (O)</option>
+            <option value="RANDOM">CYBER RANDOM</option>
+        </select>
+
+        <p style="margin-top: 20px; font-size: 0.8rem; color: #94a3b8;">X always plays first. If AI starts, it will
+            occupy a strategic sector immediately.</p>
+
+        <button onclick="toggleSettings()" style="margin-top: 20px; width: 100%;">LOCK IN</button>
+    </div>
+
+    <h1>TITAN TOE</h1>
+
+    <div class="game-container">
+        <div class="board" id="board">
+            <div class="cell" onclick="cellClick(0)" id="cell-0"></div>
+            <div class="cell" onclick="cellClick(1)" id="cell-1"></div>
+            <div class="cell" onclick="cellClick(2)" id="cell-2"></div>
+            <div class="cell" onclick="cellClick(3)" id="cell-3"></div>
+            <div class="cell" onclick="cellClick(4)" id="cell-4"></div>
+            <div class="cell" onclick="cellClick(5)" id="cell-5"></div>
+            <div class="cell" onclick="cellClick(6)" id="cell-6"></div>
+            <div class="cell" onclick="cellClick(7)" id="cell-7"></div>
+            <div class="cell" onclick="cellClick(8)" id="cell-8"></div>
+        </div>
+
+        <div class="dashboard">
+            <div class="status-box">
+                <div class="status-label">Engine Status</div>
+                <div class="status-value" id="status">READY</div>
+            </div>
+
+            <label style="font-size: 0.8rem; color: #94a3b8;">INTELLIGENCE LEVEL</label>
+            <select id="mode-select">
+                <option value="minimax">MINIMAX (IMPOSSIBLE)</option>
+                <option value="manual">VERSUS HUMAN</option>
+            </select>
+
+            <button onclick="resetGame()">INITIALIZE GAME</button>
+        </div>
+    </div>
+
+    <div class="winner-overlay" id="overlay">
+        <div class="winner-text" id="winner-text">X WINS</div>
+        <button onclick="resetGame()" style="width: auto; padding: 15px 40px;">PLAY AGAIN</button>
+    </div>
+
+    <script>
+        let gameActive = false;
+
+        async function resetGame() {
+            const mode = document.getElementById('mode-select').value;
+            let starter = document.getElementById('starter-select').value;
+            if (starter === 'RANDOM') starter = Math.random() > 0.5 ? 'X' : 'O';
+
+            const response = await fetch(`/start-game/?game=tictactoe&mode=${mode}&starter=${starter}`);
+            const data = await response.json();
+
+            gameActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('status').innerText = 'ACTIVE';
+            updateBoard(data.board);
+        }
+
+        async function cellClick(index) {
+            if (!gameActive) return;
+
+            const cell = document.getElementById(`cell-${index}`);
+            if (cell.innerText !== '') return;
+
+            const response = await fetch(`/step/?action=${index}`);
+            const data = await response.json();
+
+            updateBoard(data.board);
+
+            if (data.game_over) {
+                endGame(data.winner);
+            }
+        }
+
+        function updateBoard(board) {
+            board.forEach((val, i) => {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.innerText = val;
+                cell.className = 'cell ' + (val ? val.toLowerCase() : '');
+            });
+        }
+
+        function endGame(winner) {
+            gameActive = false;
+            const overlay = document.getElementById('overlay');
+            const winText = document.getElementById('winner-text');
+
+            if (winner) {
+                winText.innerText = winner + ' WINS';
+                winText.style.color = winner === 'X' ? 'var(--primary)' : 'var(--accent)';
+            } else {
+                winText.innerText = 'DRAW';
+                winText.style.color = '#fff';
+            }
+
+            overlay.style.display = 'flex';
+            document.getElementById('status').innerText = 'TERMINATED';
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('modal-overlay');
+            const isVisible = modal.style.display === 'block';
+            modal.style.display = isVisible ? 'none' : 'block';
+            overlay.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Initialize on load
+        resetGame();
+    </script>
+</body>
+
+</html>

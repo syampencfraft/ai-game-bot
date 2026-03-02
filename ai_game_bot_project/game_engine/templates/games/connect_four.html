@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titan Four | AI Gravity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00cec9;
+            --accent: #e17055;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --player1: #00cec9;
+            --player2: #e17055;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 206, 201, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .board-wrapper {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--border);
+            position: relative;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(7, 60px);
+            grid-template-rows: repeat(6, 60px);
+            gap: 10px;
+            background: #0f172a;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: #1e293b;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cell:hover {
+            background: rgba(0, 206, 201, 0.1);
+        }
+
+        .piece {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: translateY(-100%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .piece.dropped {
+            transform: translateY(0);
+        }
+
+        .piece.p1 {
+            background: var(--player1);
+            box-shadow: 0 0 15px var(--player1);
+        }
+
+        .piece.p2 {
+            background: var(--player2);
+            box-shadow: 0 0 15px var(--player2);
+        }
+
+        .dashboard {
+            width: 300px;
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-family: 'Orbitron';
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select {
+            background: #1e293b;
+            color: white;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #0984e3);
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 206, 201, 0.4);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay h2 {
+            font-family: 'Orbitron';
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'index' %}" class="back-link">← BACK TO HUB</a>
+    <h1>TITAN FOUR</h1>
+
+    <div class="game-container">
+        <div class="board-wrapper">
+            <div class="board" id="board">
+                <!-- 42 cells -->
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="status-card">
+                <div class="status-label">Gravity Status</div>
+                <div class="status-value" id="status">INITIALIZING...</div>
+            </div>
+
+            <label style="font-size: 0.8rem; color: #94a3b8;">PROCESSOR UNIT</label>
+            <select id="mode-select">
+                <option value="ai">NEURAL MINIMAX</option>
+                <option value="manual">LOCAL VERSUS</option>
+            </select>
+
+            <button onclick="startGame()">RESET SYSTEM</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <h2 id="win-status">VICTORY</h2>
+        <button onclick="startGame()" style="width: auto; padding: 15px 40px;">REBOOT</button>
+    </div>
+
+    <script>
+        let gameActive = false;
+
+        async function startGame() {
+            const mode = document.getElementById('mode-select').value;
+            const response = await fetch(`/start-game/?game=connect_four&mode=${mode}`);
+            const data = await response.json();
+
+            gameActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('status').innerText = 'SYSTEM ACTIVE';
+            renderBoard(data.board);
+        }
+
+        async function dropPiece(col) {
+            if (!gameActive) return;
+            const response = await fetch(`/step/?action=${col}`);
+            const data = await response.json();
+
+            renderBoard(data.board);
+
+            if (data.game_over) {
+                endGame(data.winner);
+            }
+        }
+
+        function renderBoard(board) {
+            const grid = document.getElementById('board');
+            grid.innerHTML = '';
+            // Connect Four board is stored as board[row][col]
+            for (let r = 0; r < 6; r++) {
+                for (let c = 0; c < 7; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.onclick = () => dropPiece(c);
+
+                    const val = board[r][c];
+                    if (val !== 0) {
+                        const piece = document.createElement('div');
+                        piece.className = `piece p${val} dropped`;
+                        cell.appendChild(piece);
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function endGame(winner) {
+            gameActive = false;
+            const overlay = document.getElementById('overlay');
+            const status = document.getElementById('win-status');
+
+            if (winner === 1) {
+                status.innerText = 'PLAYER 1 WINS';
+                status.style.color = 'var(--player1)';
+            } else if (winner === 2) {
+                status.innerText = 'AI OVERLORD WINS';
+                status.style.color = 'var(--player2)';
+            } else {
+                status.innerText = 'STALEMATE';
+                status.style.color = '#fff';
+            }
+
+            overlay.style.display = 'flex';
+        }
+
+        // Init
+        startGame();
+    </script>
+</body>
+
+</html>

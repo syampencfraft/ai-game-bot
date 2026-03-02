@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Sweeper | AI Probabilities</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00cec9;
+            --accent: #e17055;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 206, 201, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 4px;
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: #1e293b;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .cell:hover {
+            background: #2d3e50;
+        }
+
+        .cell.revealed {
+            background: #0f172a;
+            cursor: default;
+        }
+
+        .cell.mine {
+            background: var(--accent);
+            color: white;
+        }
+
+        .cell.flag {
+            color: var(--accent);
+        }
+
+        .cell.v1 {
+            color: #3498db;
+        }
+
+        .cell.v2 {
+            color: #2ecc71;
+        }
+
+        .cell.v3 {
+            color: #e74c3c;
+        }
+
+        .cell.v4 {
+            color: #9b59b6;
+        }
+
+        .dashboard {
+            width: 300px;
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #0984e3);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.5);
+        }
+
+        /* Settings CSS */
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.3s;
+            z-index: 100;
+        }
+
+        .settings-btn:hover {
+            color: var(--primary);
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            z-index: 1010;
+            display: none;
+            width: 300px;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1005;
+            display: none;
+        }
+
+        .back-link {
+            margin-top: 30px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'index' %}" class="back-link">← BACK TO HUB</a>
+
+    <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="toggleSettings()"></div>
+    <div class="settings-modal" id="settings-modal">
+        <h3 style="font-family: 'Orbitron'; color: var(--primary); margin-top: 0;">ZONE PARAMS</h3>
+
+        <label>DIFFICULTY PRESET</label>
+        <select id="preset-select">
+            <option value="9,9,10" selected>BEGINNER (9x9)</option>
+            <option value="16,16,40">INTERMEDIATE (16x16)</option>
+            <option value="30,16,99">EXPERT (30x16)</option>
+        </select>
+
+        <p style="margin-top: 20px; font-size: 0.8rem; color: #94a3b8;">Expert mode significantly increases board
+            entropy and mine density.</p>
+
+        <button onclick="toggleSettings()" style="margin-top: 20px; width: 100%;">APPLY</button>
+    </div>
+
+    <h1>NET SWEEPER</h1>
+
+    <div class="game-container">
+        <div class="grid" id="grid">
+            <!-- 100 cells -->
+        </div>
+
+        <div class="dashboard">
+            <div class="stat-card">
+                <div class="stat-label">MINES REMAINING</div>
+                <div class="stat-value" id="mines-count">0</div>
+            </div>
+
+            <label style="font-size: 0.8rem; color: #94a3b8;">OPERATION MODE</label>
+            <select id="mode-select">
+                <option value="manual">MANUAL (TACTICAL)</option>
+                <option value="logical">NEURAL SOLVER</option>
+            </select>
+
+            <button onclick="startGame()">INITIALIZE GRID</button>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #94a3b8; text-align: center;">Left-Click to Reveal.
+                Right-Click to Flag.</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <h2 id="win-status">STATUS</h2>
+        <button onclick="startGame()" style="width: auto; padding: 15px 40px;">TRY AGAIN</button>
+    </div>
+
+    <script>
+        let gameActive = false;
+        let aiInterval = null;
+
+        async function startGame() {
+            if (aiInterval) clearInterval(aiInterval);
+            const mode = document.getElementById('mode-select').value;
+            const preset = document.getElementById('preset-select').value.split(',');
+            const [w, h, m] = preset;
+
+            const response = await fetch(`/start-game/?game=minesweeper&mode=${mode}&w=${w}&h=${h}&m=${m}`);
+            const data = await response.json();
+
+            gameActive = true;
+            document.getElementById('overlay').style.display = 'none';
+
+            // Adjust grid columns
+            document.getElementById('grid').style.gridTemplateColumns = `repeat(${w}, 40px)`;
+
+            renderGrid(data.board);
+            document.getElementById('mines-count').innerText = data.mines_left;
+
+            if (mode === 'logical') {
+                aiInterval = setInterval(gameStepAI, 300);
+            }
+        }
+
+        async function gameStepAI() {
+            if (!gameActive) return;
+            const response = await fetch('/step/');
+            const data = await response.json();
+
+            renderGrid(data.board);
+            document.getElementById('mines-count').innerText = data.mines_left;
+
+            if (data.game_over) {
+                endGame(data.win);
+            }
+        }
+
+        async function cellAction(r, c, type) {
+            if (!gameActive || document.getElementById('mode-select').value !== 'manual') return;
+            const response = await fetch(`/step/?r=${r}&c=${c}&type=${type}`);
+            const data = await response.json();
+
+            renderGrid(data.board);
+            document.getElementById('mines-count').innerText = data.mines_left;
+
+            if (data.game_over) {
+                endGame(data.win);
+            }
+        }
+
+        function renderGrid(board) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            board.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (val === 'H') {
+                        // Hidden
+                    } else if (val === 'F') {
+                        cell.innerText = '🚩';
+                        cell.classList.add('flag');
+                    } else if (val === 'M') {
+                        cell.innerText = '💣';
+                        cell.classList.add('mine');
+                    } else {
+                        cell.classList.add('revealed');
+                        if (val !== '0') {
+                            cell.innerText = val;
+                            cell.classList.add('v' + val);
+                        }
+                    }
+
+                    cell.onclick = () => cellAction(r, c, 'reveal');
+                    cell.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        cellAction(r, c, 'flag');
+                    };
+                    grid.appendChild(cell);
+                });
+            });
+        }
+
+        function endGame(win) {
+            gameActive = false;
+            if (aiInterval) clearInterval(aiInterval);
+            const overlay = document.getElementById('overlay');
+            const status = document.getElementById('win-status');
+
+            status.innerText = win ? 'GRID SECURED' : 'GRID BREACHED';
+            status.style.color = win ? 'var(--primary)' : 'var(--accent)';
+            overlay.style.display = 'flex';
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('modal-overlay');
+            const isVisible = modal.style.display === 'block';
+            modal.style.display = isVisible ? 'none' : 'block';
+            overlay.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Initialize
+        startGame();
+    </script>
+</body>
+
+</html>

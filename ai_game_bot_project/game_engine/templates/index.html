@@ -4,507 +4,506 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Snake Bot | Next-Gen AI Demo</title>
+    <title>AI Game Bot Platform | Future of Gaming</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap"
         rel="stylesheet">
     <style>
         :root {
             --primary: #00cec9;
+            --primary-rgb: 0, 206, 201;
             --accent: #e17055;
-            --bg: #1e272e;
-            --panel: #2d3436;
-            --text: #dfe6e9;
-            --glow: 0 0 10px rgba(0, 206, 201, 0.7);
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --glow: 0 0 20px rgba(0, 206, 201, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(225, 112, 85, 0.1) 0%, transparent 50%);
+        }
+
+        .navbar {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            color: var(--text);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .hero {
+            padding: 6rem 2rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(to bottom, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            background-image: radial-gradient(circle at 50% 50%, #2d3436 0%, #1e272e 100%);
+            gap: 1.5rem;
+            backdrop-filter: blur(5px);
         }
 
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            margin-top: 0;
-            margin-bottom: 20px;
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: var(--glow);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-icon {
+            font-size: 3rem;
             color: var(--primary);
-            text-shadow: 0 0 20px rgba(0, 206, 201, 0.8);
-            font-size: 2.5rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
         }
 
-        .container {
+        .game-info h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .game-info p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .game-stats {
+            margin-top: auto;
             display: flex;
-            gap: 40px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .difficulty {
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+        }
+
+        .play-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .play-btn::after {
+            content: '→';
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover .play-btn::after {
+            transform: translateX(5px);
+        }
+
+        .leaderboard-section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .section-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--text);
+        }
+
+        .leaderboard-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+        }
+
+        .personal-best {
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(225, 112, 85, 0.1));
+            padding: 3rem;
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
         }
 
-        .game-column {
-            display: flex;
-            flex-direction: column;
+        .pb-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .pb-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-shadow: var(--glow);
+        }
+
+        .global-ranking {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+
+        .ranking-item {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--border);
             align-items: center;
+            transition: background 0.3s;
         }
 
-        #game-container {
-            position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
-            padding: 4px;
-            background: linear-gradient(45deg, var(--primary), #0984e3);
+        .ranking-item:last-child {
+            border-bottom: none;
         }
 
-        canvas {
-            background-color: #000;
-            display: block;
-            border-radius: 4px;
-        }
-
-        #stats {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            font-size: 1rem;
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .stat-box {
-            background: rgba(45, 52, 54, 0.8);
-            padding: 10px 15px;
-            border-radius: 6px;
-            border: 1px solid #636e72;
-            flex: 1;
-            text-align: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        .highlight {
-            color: var(--primary);
-            font-weight: bold;
-            display: block;
-            font-size: 1.2rem;
-            margin-top: 5px;
-        }
-
-        select {
-            background: var(--panel);
-            color: white;
-            padding: 10px;
-            border: 1px solid var(--primary);
-            border-radius: 4px;
-            font-family: 'Orbitron', sans-serif;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 5px;
-        }
-
-        label {
-            font-weight: bold;
-            color: var(--primary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        button {
-            margin: 5px;
-            padding: 12px 25px;
-            font-size: 1rem;
-            background: linear-gradient(180deg, #0984e3, #00cec9);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(9, 132, 227, 0.4);
-            font-weight: bold;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 206, 201, 0.6);
-            filter: brightness(1.2);
-        }
-
-        #dashboard {
-            width: 300px;
-            background: rgba(45, 52, 54, 0.9);
-            padding: 25px;
-            border-radius: 12px;
-            height: fit-content;
-            border: 1px solid #636e72;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 10px;
-            border-bottom: 1px solid #444;
-            transition: background 0.2s;
-        }
-
-        .leaderboard-item:hover {
+        .ranking-item:hover {
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .auth-card {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
+        .rank {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-dim);
+            font-weight: 700;
+        }
+
+        .rank-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .rank-score {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .footer {
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border);
             text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .leaderboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 
 <body>
+    <nav class="navbar">
+        <a href="/" class="logo">META<span>GAMES</span></a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+            <a href="#">Games</a>
+            <a href="#">Leaderboard</a>
+            <a href="#">Neural Interface</a>
+            <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}">Sign In</a>
+            <a href="{% url 'register' %}" style="color: var(--primary)">Initialize Profile</a>
+            {% endif %}
+        </div>
+    </nav>
 
-    <div class="container">
-        <div class="game-column">
-            <h1>AI Snake Bot</h1>
+    <header class="hero">
+        <h1>UNLEASH THE AI<br>WITHIN EVERY MOVE</h1>
+        <p>Experience the next generation of gaming. Play solo or activate our neural interfaces to see how AI masters
+            the classics.</p>
+    </header>
 
-            <div id="game-container">
-                <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <main class="games-grid">
+        <!-- Snake Game -->
+        <a href="{% url 'snake' %}" class="game-card">
+            <div class="game-icon">🐍</div>
+            <div class="game-info">
+                <h3>Neural Snake</h3>
+                <p>Pathfinding exploration through a digital grid. Experience A* search and Q-Learning agents in action.
+                </p>
             </div>
-
-            <div id="stats">
-                <div class="stat-box">Score <span id="score" class="highlight">0</span></div>
-                <div class="stat-box">Steps <span id="steps" class="highlight">0</span></div>
-                <div class="stat-box">Status <span id="status" class="highlight"
-                        style="font-size: 0.9rem; margin-top: 8px;">Ready</span></div>
+            <div class="game-stats">
+                <span class="difficulty">Adaptive</span>
+                <span class="play-btn">Play Now</span>
             </div>
+        </a>
 
-            <div style="margin-top: 30px; width: 100%;">
-                <label>Select Intelligence Model:</label>
-                <select id="agent-select">
-                    <option value="astar">A* Search (Pathfinding)</option>
-                    <option value="qlearning">Q-Learning (AI Brain)</option>
-                    <option value="manual">Manual Control (Human)</option>
-                </select>
+        <!-- Tic Tac Toe -->
+        <a href="{% url 'tictactoe' %}" class="game-card">
+            <div class="game-icon">❌</div>
+            <div class="game-info">
+                <h3>Titan Toe</h3>
+                <p>Classic strategy meets Minimax intelligence. Challenge a bot that predicts your every move perfectly.
+                </p>
             </div>
+            <div class="game-stats">
+                <span class="difficulty">Impossible</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
 
-            <div id="ml-stats"
-                style="margin-top:20px; display:none; background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; border: 1px solid #00cec9; width: 100%; box-sizing: border-box;">
-                <h3 style="margin-top: 0; color: var(--primary); font-family: 'Orbitron'; font-size: 1rem;">Neural
-                    Weights</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
-                    <div>Bias: <span id="w0" style="color: #ffeaa7;">0.0</span></div>
-                    <div>Food Dist: <span id="w1" style="color: #ff7675;">0.0</span></div>
-                    <div>Safe Space: <span id="w2" style="color: #74b9ff;">0.0</span></div>
-                    <div>Danger: <span id="w3" style="color: #fab1a0;">0.0</span></div>
-                </div>
+        <!-- 2048 -->
+        <a href="{% url 'game2048' %}" class="game-card">
+            <div class="game-icon">🧩</div>
+            <div class="game-info">
+                <h3>2048 Fusion</h3>
+                <p>Merge tiles using heuristic-weighted algorithms. Watch the AI achieve scores that defy logic.</p>
             </div>
+            <div class="game-stats">
+                <span class="difficulty">Strategic</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
 
-            <div style="margin-top: 25px; display: flex; gap: 10px; width: 100%; justify-content: center;">
-                {% if user.is_authenticated %}
-                <button onclick="startGame()">New Game</button>
-                <button onclick="pauseGame()" style="background: #e67e22;">Pause</button>
-                <button onclick="resumeGame()" style="background: #27ae60;">Resume</button>
-                {% else %}
-                <div class="auth-card" style="width: 100%;">
-                    <h3 style="color: var(--accent); margin: 0 0 10px 0; font-family: 'Orbitron';">Access Restricted
-                    </h3>
-                    <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #b2bec3;">Login required to activate neural
-                        interface.</p>
-                    <a href="{% url 'login' %}">
-                        <button style="width: 100%; background: var(--primary);">Login to Play</button>
-                    </a>
-                </div>
-                {% endif %}
+        <!-- Minesweeper -->
+        <a href="{% url 'minesweeper' %}" class="game-card">
+            <div class="game-icon">💣</div>
+            <div class="game-info">
+                <h3>Net Sweeper</h3>
+                <p>Logic and probability combined. Our solver uses advanced inference to clear the field without a
+                    single error.</p>
             </div>
+            <div class="game-stats">
+                <span class="difficulty">Expert</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+
+        <!-- Sudoku -->
+        <a href="{% url 'sudoku' %}" class="game-card">
+            <div class="game-icon">🔢</div>
+            <div class="game-info">
+                <h3>Logic Grid</h3>
+                <p>Constraint satisfaction problem solving. Watch the backtracking algorithm fill the grid in
+                    milliseconds.</p>
+            </div>
+            <div class="game-stats">
+                <span class="difficulty">Zen</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+
+        <!-- Connect Four -->
+        <a href="{% url 'connect_four' %}" class="game-card">
+            <div class="game-icon">🔴</div>
+            <div class="game-info">
+                <h3>Titan Four</h3>
+                <p>Vertical strategy utilizing Minimax gravity. Outmaneuver the AI in this multi-dimensional gravity
+                    field.</p>
+            </div>
+            <div class="game-stats">
+                <span class="difficulty">Tactical</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+
+        <!-- Othello -->
+        <a href="{% url 'othello' %}" class="game-card">
+            <div class="game-icon">🌗</div>
+            <div class="game-info">
+                <h3>Cyber Flip</h3>
+                <p>Territory dominance through logical inversion. A high-stakes battle of piece conversion and survival.
+                </p>
+            </div>
+            <div class="game-stats">
+                <span class="difficulty">Elite</span>
+                <span class="play-btn">Play Now</span>
+            </div>
+        </a>
+    </main>
+
+    <section class="leaderboard-section">
+        <div class="section-header">
+            <h2>GLOBAL PERFORMANCE</h2>
+            <p style="color: var(--text-dim)">Top neural-enhanced operators</p>
         </div>
 
-        <div id="dashboard">
-            <div style="text-align: right; margin-bottom: 25px;">
-                {% if user.is_authenticated %}
-                <div style="margin-bottom: 5px; font-size: 0.9rem; color: #b2bec3;">OPERATOR</div>
-                <div style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; margin-bottom: 10px;">{{ user.username }}</div>
-                <a href="{% url 'logout' %}"
-                    style="color: var(--accent); text-decoration: none; font-size: 0.8rem; border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; transition: all 0.2s;">TERMINATE
-                    SESSION</a>
-                {% else %}
-                <div style="margin-bottom: 5px;">GUEST USER</div>
-                <a href="{% url 'login' %}" style="color: var(--primary); text-decoration: none;">Identify Yourself</a>
-                {% endif %}
+        <div class="leaderboard-container">
+            <div class="personal-best">
+                <div class="pb-label">PERSONAL BEST</div>
+                <div class="pb-value">{{ user_high_score }}</div>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-dim)">Keep training to reach the elite
+                </p>
             </div>
 
-            <h3
-                style="color: #ffeaa7; border-bottom: 1px solid #636e72; padding-bottom: 10px; margin-top: 0; font-family: 'Orbitron'; font-size: 1rem;">
-                PERSONAL BEST
-                <span style="color: white; display: block; font-size: 2rem; margin-top: 10px;">{{ user_high_score }}</span>
-            </h3>
-
-            <h3
-                style="color: #74b9ff; border-bottom: 1px solid #636e72; padding-bottom: 10px; font-family: 'Orbitron'; font-size: 1rem; margin-top: 30px;">
-                GLOBAL RANKING</h3>
-            <ul style="list-style: none; padding: 0; margin: 0;">
+            <div class="global-ranking">
                 {% for s in top_scores %}
-                <li class="leaderboard-item">
-                    <span style="color: #b2bec3; font-family: 'Roboto Mono';">#{{ forloop.counter }} {{ s.user.username }}</span>
-                    <span style="color: #fab1a0; font-weight: bold; font-family: 'Orbitron';">{{ s.score }}</span>
-                </li>
+                <div class="ranking-item">
+                    <span class="rank">#{{ forloop.counter }}</span>
+                    <span class="rank-name">{{ s.user.username }}</span>
+                    <span class="rank-score">{{ s.score }}</span>
+                </div>
                 {% empty %}
-                <li style="color: #636e72; padding: 15px 0; text-align: center;">No Data Available</li>
+                <div class="ranking-item" style="justify-content: center; color: var(--text-dim)">
+                    System awaiting initial data...
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const cellSize = 20; // 400px / 20 = 20x20 grid
-
-        let gameActive = false;
-        let stepCount = 0;
-        let nextAction = 1; // Default Right.
-        let isPaused = false;
-        let currentScore = 0;
-
-        // Sounds
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playTone(freq, type, duration) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function playEatSound() { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.1), 50); }
-        function playMoveSound() { playTone(200, 'triangle', 0.05); }
-        function playDieSound() { playTone(150, 'sawtooth', 0.3); setTimeout(() => playTone(100, 'sawtooth', 0.4), 100); }
-        function playWinSound() { playTone(400, 'square', 0.1); setTimeout(() => playTone(600, 'square', 0.1), 100); setTimeout(() => playTone(800, 'square', 0.4), 200); }
-
-        // Key Listener
-        document.addEventListener('keydown', (e) => {
-            // 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT
-            let oldAction = nextAction;
-            if (e.key === 'ArrowUp') nextAction = 0;
-            else if (e.key === 'ArrowRight') nextAction = 1;
-            else if (e.key === 'ArrowDown') nextAction = 2;
-            else if (e.key === 'ArrowLeft') nextAction = 3;
-
-            // If manual mode, play sound on valid key press
-            if (document.getElementById('agent-select').value === 'manual' && oldAction !== nextAction) {
-                // playMoveSound(); // Optional: can be annoying if spamming
-            }
-        });
-
-        async function startGame() {
-            const mode = document.getElementById('agent-select').value;
-
-            // Show/Hide ML stats
-            if (mode === 'qlearning') {
-                document.getElementById('ml-stats').style.display = 'block';
-            } else {
-                document.getElementById('ml-stats').style.display = 'none';
-            }
-
-            // Reset default action for manual
-            nextAction = 1;
-            isPaused = false;
-
-            try {
-                const response = await fetch('/start-game/?mode=' + mode);
-                const state = await response.json();
-                playWinSound(); // Start sound
-                render(state);
-                gameActive = true;
-                stepCount = 0;
-                currentScore = 0;
-                document.getElementById('status').innerText = "SYSTEM ACTIVE";
-                document.getElementById('status').style.color = '#00cec9'; // Primary
-                gameLoop();
-            } catch (error) {
-                console.error("Failed to start game:", error);
-                document.getElementById('status').innerText = "ERROR";
-                document.getElementById('status').style.color = 'red';
-            }
-        }
-
-        function pauseGame() {
-            if (gameActive) {
-                gameActive = false;
-                isPaused = true;
-                document.getElementById('status').innerText = "SUSPENDED";
-                document.getElementById('status').style.color = '#e67e22'; // Orange
-            }
-        }
-
-        function resumeGame() {
-            if (!gameActive && isPaused) {
-                gameActive = true;
-                isPaused = false;
-                document.getElementById('status').innerText = "SYSTEM ACTIVE";
-                document.getElementById('status').style.color = '#00cec9';
-                gameLoop();
-            }
-        }
-
-        const IS_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
-
-        async function saveScore(score) {
-            if (IS_AUTHENTICATED) {
-                try {
-                    await fetch('/save-score/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ score: score })
-                    });
-                    console.log("Score saved!");
-                } catch (e) {
-                    console.error("Error saving score", e);
-                }
-            } else {
-                console.log("Not logged in, score not saved.");
-            }
-        }
-
-        let previousScore = 0;
-
-        async function gameLoop() {
-            if (!gameActive) return;
-
-            try {
-                const mode = document.getElementById('agent-select').value;
-                let url = '/step/';
-
-                // If Manual, send action
-                if (mode === 'manual') {
-                    url += '?action=' + nextAction;
-                }
-
-                const response = await fetch(url);
-                const data = await response.json();
-
-                // Sound Logic
-                if (data.score > previousScore) {
-                    playEatSound();
-                }
-                previousScore = data.score;
-
-                render(data);
-                stepCount++;
-                document.getElementById('steps').innerText = stepCount;
-                currentScore = data.score;
-
-                // Update ML weights if present
-                if (data.weights) {
-                    document.getElementById('w0').innerText = data.weights[0].toFixed(4);
-                    document.getElementById('w1').innerText = data.weights[1].toFixed(4);
-                    document.getElementById('w2').innerText = data.weights[2].toFixed(4);
-                    document.getElementById('w3').innerText = data.weights[3].toFixed(4);
-                }
-
-                if (data.game_over) {
-                    gameActive = false;
-                    playDieSound();
-                    document.getElementById('status').innerText = "TERMINATED";
-                    document.getElementById('status').style.color = '#ff7675'; // Red-ish
-                    saveScore(currentScore);
-                    return;
-                }
-
-                // Delay
-                let delay = 100;
-                if (mode === 'qlearning') delay = 25;
-                if (mode === 'manual') delay = 150; // Slower for human reaction time
-
-                setTimeout(gameLoop, delay);
-
-            } catch (error) {
-                console.error("Game loop error:", error);
-                gameActive = false;
-            }
-        }
-
-        function render(state) {
-            // Clear - slight transparency for trails? No, canvas simple clear
-            ctx.fillStyle = '#1e272e';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Grid lines (optional for pro look)
-            ctx.strokeStyle = '#2d3436';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < canvas.width; i += cellSize) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
-            }
-
-            // Draw Snake
-            state.snake.forEach((segment, index) => {
-                const x = segment[0] * cellSize;
-                const y = segment[1] * cellSize;
-
-                // Head is slightly different color & glowing
-                if (index === 0) {
-                    ctx.fillStyle = '#81ecec';
-                    ctx.shadowColor = '#00cec9';
-                    ctx.shadowBlur = 10;
-                } else {
-                    ctx.fillStyle = '#00cec9';
-                    ctx.shadowBlur = 0;
-                }
-
-                ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
-            });
-            ctx.shadowBlur = 0; // Reset
-
-            // Draw Food
-            const fx = state.food[0] * cellSize;
-            const fy = state.food[1] * cellSize;
-            ctx.fillStyle = '#e17055'; // Food Color
-            ctx.shadowColor = '#d63031';
-            ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.arc(fx + cellSize / 2, fy + cellSize / 2, cellSize / 2 - 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Update Score
-            document.getElementById('score').innerText = state.score;
-        }
-
-        // Reset previous score on new game
-        function restartGame() {
-            previousScore = 0;
-            startGame();
-        }
-
-        // Start on load (if using keyboard, usually user initiates, but auto-start is fine if login present)
-        // Removed auto-start to allow user to choose mode first or ready up.
-
-    </script>
+    <footer class="footer">
+        <p>&copy; 2026 METAGAMES AI LABS. ALL RIGHTS RESERVED.</p>
+    </footer>
 </body>
 
 </html>

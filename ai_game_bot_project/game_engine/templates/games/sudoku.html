@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Grid | AI Backtracking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00cec9;
+            --accent: #e17055;
+            --bg: #0f172a;
+            --surface: rgba(30, 41, 59, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 206, 201, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 50px);
+            grid-template-rows: repeat(9, 50px);
+            background: var(--surface);
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text);
+            background: rgba(15, 23, 42, 0.4);
+            transition: all 0.2s;
+        }
+
+        .cell input {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: inherit;
+            text-align: center;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+        }
+
+        .cell.original {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Thicker borders for 3x3 grids */
+        .cell:nth-child(3n) {
+            border-right: 2px solid rgba(0, 206, 201, 0.3);
+        }
+
+        .cell:nth-child(9n) {
+            border-right: none;
+        }
+
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 2px solid rgba(0, 206, 201, 0.3);
+        }
+
+        .cell.active {
+            background: rgba(0, 206, 201, 0.1);
+            box-shadow: inset 0 0 10px var(--primary);
+        }
+
+        .dashboard {
+            width: 300px;
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-box {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .status-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid var(--border);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #0984e3);
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 206, 201, 0.3);
+        }
+
+        .back-link {
+            margin-top: 30px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Settings CSS */
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.3s;
+            z-index: 100;
+        }
+
+        .settings-btn:hover {
+            color: var(--primary);
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            z-index: 1010;
+            display: none;
+            width: 300px;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1005;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'index' %}" class="back-link">← BACK TO HUB</a>
+
+    <div class="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div class="modal-overlay" id="modal-overlay" onclick="toggleSettings()"></div>
+    <div class="settings-modal" id="settings-modal">
+        <h3 style="font-family: 'Orbitron'; color: var(--primary); margin-top: 0;">LOGIC PARAMS</h3>
+
+        <label>CHALLENGE DEPTH</label>
+        <select id="difficulty-select">
+            <option value="25">EASY (25 EMPTY)</option>
+            <option value="45" selected>MEDIUM (45 EMPTY)</option>
+            <option value="60">EXPERT (60 EMPTY)</option>
+        </select>
+
+        <p style="margin-top: 20px; font-size: 0.8rem; color: #94a3b8;">Expert mode leaves behind only the most critical
+            anchors for logical deduction.</p>
+
+        <button onclick="toggleSettings()" style="margin-top: 20px; width: 100%;">APPLY</button>
+    </div>
+
+    <h1>LOGIC GRID</h1>
+
+    <div class="game-container">
+        <div class="sudoku-grid" id="grid">
+            <!-- 81 cells -->
+        </div>
+
+        <div class="dashboard">
+            <div class="status-box">
+                <div class="status-label">SOLVER STATUS</div>
+                <div class="status-value" id="status">IDLE</div>
+            </div>
+
+            <label style="font-size: 0.8rem; color: #94a3b8;">INTERACTION MODE</label>
+            <select id="mode-select">
+                <option value="manual">MANUAL (COGNITIVE)</option>
+                <option value="solver">BACKTRACKING AI</option>
+            </select>
+
+            <button onclick="startGame()">INITIALIZE GRID</button>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #94a3b8; text-align: center;">Fill the grid with
+                numbers 1-9 without repetition in rows, columns, or 3x3 squares.</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <h2 style="font-family: 'Orbitron'; font-size: 4rem; color: var(--primary); margin-bottom: 20px;">GRID COMPLETED
+        </h2>
+        <button onclick="startGame()" style="width: auto; padding: 15px 40px;">NEW CHALLENGE</button>
+    </div>
+
+    <script>
+        let gameActive = false;
+        let aiInterval = null;
+
+        async function startGame() {
+            if (aiInterval) clearInterval(aiInterval);
+            const mode = document.getElementById('mode-select').value;
+            const empty = document.getElementById('difficulty-select').value;
+            const response = await fetch(`/start-game/?game=sudoku&mode=${mode}&empty=${empty}`);
+            const data = await response.json();
+
+            gameActive = true;
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('status').innerText = 'ACTIVE';
+            renderGrid(data);
+
+            if (mode === 'solver') {
+                aiInterval = setInterval(gameStepAI, 100);
+            }
+        }
+
+        async function gameStepAI() {
+            if (!gameActive) return;
+            const response = await fetch('/step/');
+            const data = await response.json();
+
+            renderGrid(data);
+
+            if (data.game_over) {
+                endGame();
+            }
+        }
+
+        async function makeMove(r, c, val) {
+            if (!gameActive || document.getElementById('mode-select').value !== 'manual') return;
+            if (isNaN(val) || val < 1 || val > 9) val = 0;
+
+            const response = await fetch(`/step/?r=${r}&c=${c}&val=${val}`);
+            const data = await response.json();
+
+            renderGrid(data);
+
+            if (data.game_over) {
+                endGame();
+            }
+        }
+
+        function renderGrid(state) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            state.board.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if (state.original[r][c]) {
+                        cell.classList.add('original');
+                        cell.innerText = val;
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.value = val === 0 ? '' : val;
+                        input.oninput = (e) => makeMove(r, c, parseInt(e.target.value));
+                        cell.appendChild(input);
+                    }
+                    grid.appendChild(cell);
+                });
+            });
+        }
+
+        function endGame() {
+            gameActive = false;
+            if (aiInterval) clearInterval(aiInterval);
+            document.getElementById('overlay').style.display = 'flex';
+            document.getElementById('status').innerText = 'COMPLETED';
+        }
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const overlay = document.getElementById('modal-overlay');
+            const isVisible = modal.style.display === 'block';
+            modal.style.display = isVisible ? 'none' : 'block';
+            overlay.style.display = isVisible ? 'none' : 'block';
+        }
+
+        // Initialize
+        startGame();
+    </script>
+</body>
+
+</html>

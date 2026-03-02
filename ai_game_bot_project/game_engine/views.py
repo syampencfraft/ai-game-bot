@@ -8,29 +8,71 @@ from django.contrib.auth.decorators import login_required
 from .models import Score
 import json
 from .snake_game import SnakeGame
+from .tictactoe_logic import TicTacToe, minimax
+from .game2048_logic import Game2048
+from .minesweeper_logic import Minesweeper
+from .sudoku_logic import Sudoku
+from .connect_four_logic import ConnectFour
+from .othello_logic import Othello
+import random
 from .ai_agent import AIAgent
 from .q_learning_agent import QLearningAgent
+import math
 
 # Global game and agent instances
 valid_games = {}
 valid_agents = {} # session_id -> agent_instance
 
-def index(request):
-    """Renders the game dashboard."""
-    # Get top 10 scores
+def _get_common_context(request):
     top_scores = Score.objects.order_by('-score')[:10]
-    
-    # Get user's high score
     user_high_score = 0
     if request.user.is_authenticated:
         user_scores = Score.objects.filter(user=request.user).order_by('-score')
         if user_scores.exists():
             user_high_score = user_scores.first().score
-            
-    return render(request, 'index.html', {
-        'top_scores': top_scores, 
+    return {
+        'top_scores': top_scores,
         'user_high_score': user_high_score
-    })
+    }
+
+def index(request):
+    """Renders the main landing page."""
+    return render(request, 'index.html', _get_common_context(request))
+
+@login_required
+def snake_view(request):
+    """Renders the Snake game page."""
+    return render(request, 'games/snake.html', _get_common_context(request))
+
+@login_required
+def tictactoe_view(request):
+    """Renders the Tic-Tac-Toe game page."""
+    return render(request, 'games/tictactoe.html', _get_common_context(request))
+
+@login_required
+def game2048_view(request):
+    """Renders the 2048 game page."""
+    return render(request, 'games/2048.html', _get_common_context(request))
+
+@login_required
+def minesweeper_view(request):
+    """Renders the Minesweeper game page."""
+    return render(request, 'games/minesweeper.html', _get_common_context(request))
+
+@login_required
+def sudoku_view(request):
+    """Renders the Sudoku game page."""
+    return render(request, 'games/sudoku.html', _get_common_context(request))
+
+@login_required
+def connect_four_view(request):
+    """Renders the Connect Four game page."""
+    return render(request, 'games/connect_four.html', _get_common_context(request))
+
+@login_required
+def othello_view(request):
+    """Renders the Othello game page."""
+    return render(request, 'games/othello.html', _get_common_context(request))
 
 def register_view(request):
     if request.method == 'POST':
@@ -80,8 +122,37 @@ def start_game(request):
     if not request.user.is_authenticated:
         return JsonResponse({'status': 'error', 'message': 'Authentication required'}, status=401)
 
-    game = SnakeGame()
-    state = game.reset()
+    game_type = request.GET.get('game', 'snake')
+    mode = request.GET.get('mode', 'astar')
+    
+    if game_type == 'tictactoe':
+        starter = request.GET.get('starter', 'X')
+        game = TicTacToe(starter=starter)
+        state = game.get_state()
+    elif game_type == '2048':
+        game = Game2048()
+        state = game.get_state()
+    elif game_type == 'minesweeper':
+        w = int(request.GET.get('w', 10))
+        h = int(request.GET.get('h', 10))
+        m = int(request.GET.get('m', 15))
+        game = Minesweeper(width=w, height=h, mines=m)
+        state = game.get_state()
+    elif game_type == 'sudoku':
+        empty = int(request.GET.get('empty', 40))
+        game = Sudoku(empty_cells=empty)
+        state = game.get_state()
+    elif game_type == 'connect_four':
+        game = ConnectFour()
+        state = game.get_state()
+    elif game_type == 'othello':
+        game = Othello()
+        state = game.get_state()
+    else:
+        w = int(request.GET.get('w', 20))
+        h = int(request.GET.get('h', 20))
+        game = SnakeGame(width=w, height=h)
+        state = game.reset()
     
     # Store in global dict
     session_id = request.session.session_key or 'default'
@@ -92,19 +163,46 @@ def start_game(request):
     valid_games[session_id] = game
     
     # Select Agent
-    mode = request.GET.get('mode', 'astar') # default to astar
-    if mode == 'qlearning':
-        # Persist Q-Agent if exists to keep learning? 
-        # For this demo, let's keep the agent alive across games if possible
-        if session_id not in valid_agents or not isinstance(valid_agents[session_id], QLearningAgent):
-             valid_agents[session_id] = QLearningAgent(game)
+    if game_type == 'tictactoe':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
         else:
-             # Just update the game ref
-             valid_agents[session_id].game = game
-    elif mode == 'manual':
-        valid_agents[session_id] = 'manual' # Marker for manual mode
+            valid_agents[session_id] = 'minimax'
+    elif game_type == '2048':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = 'heuristic'
+    elif game_type == 'minesweeper':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = 'logical'
+    elif game_type == 'sudoku':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = 'solver'
+    elif game_type == 'connect_four':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = 'ai' # AI logic is in game_step
+    elif game_type == 'othello':
+        if mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = 'ai' # AI logic is in game_step
     else:
-        valid_agents[session_id] = AIAgent(game)
+        if mode == 'qlearning':
+            if session_id not in valid_agents or not isinstance(valid_agents[session_id], QLearningAgent):
+                 valid_agents[session_id] = QLearningAgent(game)
+            else:
+                 valid_agents[session_id].game = game
+        elif mode == 'manual':
+            valid_agents[session_id] = 'manual'
+        else:
+            valid_agents[session_id] = AIAgent(game)
     
     return JsonResponse(state)
 
@@ -119,37 +217,126 @@ def game_step(request):
     agent = valid_agents.get(session_id)
     
     if not game:
-        # Try to recover
-        game = SnakeGame()
-        valid_games[session_id] = game
-        agent = AIAgent(game) # Default
-        valid_agents[session_id] = agent
-    
-    state_before = game.get_state()
+        return JsonResponse({'status': 'error', 'message': 'No active game'}, status=400)
     
     # Determine Action
-    if agent == 'manual':
-        # User provides action via request
-        try:
-            action = int(request.GET.get('action', 1)) # Default to RIGHT if missing
-        except:
-            action = 1
+    if isinstance(game, TicTacToe):
+        if agent == 'manual':
+            try:
+                action = int(request.GET.get('action'))
+            except:
+                return JsonResponse({'status': 'error', 'message': 'Invalid action'}, status=400)
+        else:
+            # AI move
+            move_info = minimax(game, 'O', 'O', 'X')
+            action = move_info['position']
+        
+        if action is not None:
+            game.make_move(action, 'O' if agent != 'manual' else 'X')
+            
+            # If AI move was human, then AI move too if game not over
+            if agent == 'manual' and not game.get_state()['game_over']:
+                ai_move = minimax(game, 'O', 'O', 'X')['position']
+                if ai_move is not None:
+                    game.make_move(ai_move, 'O')
+        
+        response_data = game.get_state()
+    elif isinstance(game, Game2048):
+        if agent == 'manual':
+            try:
+                action = int(request.GET.get('action'))
+                game.move(action)
+            except:
+                return JsonResponse({'status': 'error', 'message': 'Invalid action'}, status=400)
+        else:
+            action = game.get_best_move()
+            game.move(action)
+        response_data = game.get_state()
+    elif isinstance(game, Minesweeper):
+        if agent == 'manual':
+            try:
+                r = int(request.GET.get('r'))
+                c = int(request.GET.get('c'))
+                type = request.GET.get('type', 'reveal')
+                if type == 'flag':
+                    game.toggle_flag(r, c)
+                else:
+                    game.reveal(r, c)
+            except:
+                return JsonResponse({'status': 'error', 'message': 'Invalid coordinates'}, status=400)
+        else:
+            move = game.get_next_ai_move()
+            if move:
+                if move['type'] == 'flag':
+                    game.toggle_flag(*move['pos'])
+                else:
+                    game.reveal(*move['pos'])
+        response_data = game.get_state()
+    elif isinstance(game, Sudoku):
+        if agent == 'manual':
+            try:
+                r = int(request.GET.get('r'))
+                c = int(request.GET.get('c'))
+                val = int(request.GET.get('val'))
+                game.make_move(r, c, val)
+            except:
+                return JsonResponse({'status': 'error', 'message': 'Invalid move'}, status=400)
+        else:
+            game.solve_step()
+        response_data = game.get_state()
+    elif isinstance(game, ConnectFour):
+        action = request.GET.get('action')
+        if action is not None:
+            col = int(action)
+            if game.is_valid_location(col):
+                game.drop_piece(col, 1)
+                if not game.win_check(1) and game.get_valid_locations():
+                    ai_col, _ = game.minimax(3, -math.inf, math.inf, True)
+                    if ai_col is not None:
+                        game.drop_piece(ai_col, 2)
+        
+        response_data = game.get_state()
+        if game.win_check(1):
+            response_data['game_over'] = True
+            response_data['winner'] = 1
+        elif game.win_check(2):
+            response_data['game_over'] = True
+            response_data['winner'] = 2
+        elif not game.get_valid_locations():
+            response_data['game_over'] = True
+            response_data['winner'] = 0
+            
+    elif isinstance(game, Othello):
+        r = request.GET.get('r')
+        c = request.GET.get('c')
+        if r is not None and c is not None:
+            r, c = int(r), int(c)
+            if game.make_move(r, c, 1):
+                # AI Turn
+                move = game.ai_move()
+                if move:
+                    game.make_move(move[0], move[1], 2)
+        response_data = game.get_state()
     else:
-        # AI provides action
-        action = agent.get_move(state_before)
-    
-    state_next, reward, done = game.step(action)
-    
-    # If Q-Learning, train!
-    if isinstance(agent, QLearningAgent):
-        agent.update(state_before, action, reward, state_next, done)
-    
-    response_data = state_next
-    response_data['reward'] = reward
-    response_data['action'] = action
-    
-    # Return weights if QLearning for visualization
-    if isinstance(agent, QLearningAgent):
-        response_data['weights'] = agent.weights.tolist()
+        # Snake Game Logic
+        state_before = game.get_state()
+        if agent == 'manual':
+            try:
+                action = int(request.GET.get('action', 1))
+            except:
+                action = 1
+        else:
+            action = agent.get_move(state_before)
+        
+        state_next, reward, done = game.step(action)
+        
+        if isinstance(agent, QLearningAgent):
+            agent.update(state_before, action, reward, state_next, done)
+        
+        response_data = state_next
+        response_data['reward'] = reward
+        response_data['action'] = action
+        if isinstance(agent, QLearningAgent):
+            response_data['weights'] = agent.weights.tolist()
     
     return JsonResponse(response_data)
