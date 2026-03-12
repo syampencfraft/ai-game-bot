@@ -306,8 +306,8 @@
             <div style="text-align: right; margin-bottom: 25px;">
                 {% if user.is_authenticated %}
                 <div style="margin-bottom: 5px; font-size: 0.9rem; color: #b2bec3;">OPERATOR</div>
-                <div style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; margin-bottom: 10px;">{{
-                    user.username }}</div>
+                <div style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; margin-bottom: 10px;">
+                    {{ user.username }}</div>
                 <a href="{% url 'logout' %}"
                     style="color: var(--accent); text-decoration: none; font-size: 0.8rem; border: 1px solid var(--accent); padding: 4px 10px; border-radius: 4px; transition: all 0.2s;">TERMINATE
                     SESSION</a>

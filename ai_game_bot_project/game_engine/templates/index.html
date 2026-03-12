@@ -232,100 +232,6 @@
             transform: translateX(5px);
         }
 
-        .leaderboard-section {
-            padding: 6rem 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            margin-bottom: 3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .section-header h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            color: var(--text);
-        }
-
-        .leaderboard-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 4rem;
-        }
-
-        .personal-best {
-            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(225, 112, 85, 0.1));
-            padding: 3rem;
-            border-radius: 1.5rem;
-            border: 1px solid var(--border);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .pb-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1rem;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            margin-bottom: 1rem;
-        }
-
-        .pb-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--primary);
-            text-shadow: var(--glow);
-        }
-
-        .global-ranking {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 1.5rem;
-            overflow: hidden;
-        }
-
-        .ranking-item {
-            display: grid;
-            grid-template-columns: 50px 1fr 100px;
-            padding: 1.25rem 2rem;
-            border-bottom: 1px solid var(--border);
-            align-items: center;
-            transition: background 0.3s;
-        }
-
-        .ranking-item:last-child {
-            border-bottom: none;
-        }
-
-        .ranking-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .rank {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--text-dim);
-            font-weight: 700;
-        }
-
-        .rank-name {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .rank-score {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--accent);
-            text-align: right;
-            font-weight: 700;
-        }
-
         .footer {
             padding: 4rem 2rem;
             border-top: 1px solid var(--border);
@@ -337,10 +243,6 @@
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
-            }
-
-            .leaderboard-container {
-                grid-template-columns: 1fr;
             }
 
             .nav-links {
@@ -355,9 +257,7 @@
         <a href="/" class="logo">META<span>GAMES</span></a>
         <div class="nav-links">
             {% if user.is_authenticated %}
-            <a href="#">Games</a>
-            <a href="#">Leaderboard</a>
-            <a href="#">Neural Interface</a>
+            <a href="#games">Games</a>
             <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
             {% else %}
             <a href="{% url 'login' %}">Sign In</a>
@@ -372,7 +272,7 @@
             the classics.</p>
     </header>
 
-    <main class="games-grid">
+    <main class="games-grid" id="games">
         <!-- Snake Game -->
         <a href="{% url 'snake' %}" class="game-card">
             <div class="game-icon">🐍</div>
@@ -471,35 +371,6 @@
         </a>
     </main>
 
-    <section class="leaderboard-section">
-        <div class="section-header">
-            <h2>GLOBAL PERFORMANCE</h2>
-            <p style="color: var(--text-dim)">Top neural-enhanced operators</p>
-        </div>
-
-        <div class="leaderboard-container">
-            <div class="personal-best">
-                <div class="pb-label">PERSONAL BEST</div>
-                <div class="pb-value">{{ user_high_score }}</div>
-                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-dim)">Keep training to reach the elite
-                </p>
-            </div>
-
-            <div class="global-ranking">
-                {% for s in top_scores %}
-                <div class="ranking-item">
-                    <span class="rank">#{{ forloop.counter }}</span>
-                    <span class="rank-name">{{ s.user.username }}</span>
-                    <span class="rank-score">{{ s.score }}</span>
-                </div>
-                {% empty %}
-                <div class="ranking-item" style="justify-content: center; color: var(--text-dim)">
-                    System awaiting initial data...
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
 
     <footer class="footer">
         <p>&copy; 2026 METAGAMES AI LABS. ALL RIGHTS RESERVED.</p>

@@ -114,7 +114,7 @@ class Game2048:
                 if board[i][j] != 0:
                     k = j + 1
                     while k < 4 and board[i][k] == 0: k += 1
-                    if k < 4:
+                    if k < 4 and board[i][k] != 0:
                         smooth_score -= abs(np.log2(board[i][j]) - np.log2(board[i][k]))
         
         return empty_cells * 100 + max_tile * 10 + mono_score * 50 + smooth_score * 5
